@@ -1,0 +1,18 @@
+Package: omnibench.logger
+Type: Package
+Title: Streaming Structured Logger for Omnibenchmark Workflows
+Version: 0.1.0
+Authors@R: person("btraven", role = c("aut", "cre"),
+                  email = "ben.uzh@proton.me")
+Description: Lightweight JSONL event logger for Snakemake-driven
+    omnibenchmark pipelines. Provides init_logger() and emit() to
+    record start/end events conforming to the omnibench-events 0.1
+    wire spec.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    jsonlite
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.3.0
