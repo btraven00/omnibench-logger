@@ -6,3 +6,4 @@
 *.Rcheck/
 omnibenchR.Rcheck/
 *.pyc
+*.swp
