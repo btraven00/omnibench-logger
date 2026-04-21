@@ -32,13 +32,42 @@ The profiler tells you **what** the process was doing; this log tells
 you **what phase it was in** while it was doing it. Neither is
 sufficient alone.
 
+## Installation
+
+```bash
+pip install omnibench-logger
+```
+
+Or directly from source:
+
+```bash
+pip install .
+```
+
+## Usage
+
+```python
+from omnibench_logger import init_logger, emit
+
+init_logger("/path/to/logs")
+
+emit("align", "start")
+# … do work …
+emit("align", "end")
+```
+
+`init_logger(path)` creates the directory if needed and sets the output file
+to `<path>/omnibench-events.jsonl`. `emit(event, phase)` appends a JSON-lines
+record with a UTC timestamp, PID, and hostname. An optional `attrs` dict can
+carry extra fields.
+
 ## Layout
 
 - [`SPEC.md`](SPEC.md) — language-agnostic wire format (omnibench-events 0.1).
+- [`omnibench_logger/`](omnibench_logger/) — Python package (`omnibench-logger` on PyPI).
 - [`omnibench.logger/`](omnibench.logger/) — R reference implementation.
   (The package is named with a dot because R doesn't allow hyphens in
   package names.)
-- `omnibench-logger/` (Python) — planned port; not yet in this repo.
 
 ## Status
 
