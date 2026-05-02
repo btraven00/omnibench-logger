@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 
-from omnibench_logger import _state, emit, init_logger
+from obkit.logger import _state, emit, init_logger
 
 
 def test_init_logger_creates_missing_directory_and_returns_log_path():

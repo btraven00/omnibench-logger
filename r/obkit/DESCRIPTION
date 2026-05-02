@@ -1,0 +1,17 @@
+Package: obkit
+Type: Package
+Title: Omnibenchmark Utility Toolkit
+Version: 0.1.0
+Authors@R: person("btraven", role = c("aut", "cre"),
+                  email = "ben.uzh@proton.me")
+Description: Lean utilities for omnibenchmark workflows. Provides structured
+    JSONL event logging (logger_init(), logger_emit()) and profiler alignment
+    helpers, with minimal dependencies.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    jsonlite
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.3.0

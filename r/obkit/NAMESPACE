@@ -1,0 +1,3 @@
+export(logger_init)
+export(logger_emit)
+importFrom(jsonlite, toJSON)

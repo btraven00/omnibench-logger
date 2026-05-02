@@ -35,7 +35,7 @@ def emit(event, phase, attrs=None):
     if log_file is None:
         if not _state["warned_uninit"]:
             print(
-                "omnibench: emit() called before init_logger(); events discarded.",
+                "obkit: emit() called before init_logger(); events discarded."
                 file=sys.stderr,
             )
             _state["warned_uninit"] = True
@@ -59,5 +59,5 @@ def emit(event, phase, attrs=None):
             f.write(line + "\n")
         return True
     except Exception as e:
-        print(f"omnibench: emit() write failed: {e}", file=sys.stderr)
+        print(f"obkit: emit() write failed: {e}", file=sys.stderr)
         return False

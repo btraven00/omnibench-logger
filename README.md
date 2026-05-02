@@ -1,73 +1,73 @@
-# omnibench-logger
+# obkit
 
-Tiny structured event logger for [omnibenchmark](
-https://omnibenchmark.org) / Snakemake pipelines. Writes named
-start/end events to a JSON-lines file so that downstream tooling can
-reason about the phases of a rule without parsing ad-hoc stdout.
+Lean utility toolkit for [omnibenchmark](https://omnibenchmark.org) /
+Snakemake workflows. Available for Python and R. Zero or near-zero
+dependencies.
 
-## Why this exists
+## Modules
 
-Workflow rules do interesting things in several named phases
-(`download`, `align`, `sort`, `index`, …). Wall-clock timing is
-useful but phase-level attribution is what actually helps you
-optimize. This library gives you two calls — `init_logger(path)` and
-`emit(event, phase)` — that drop a structured anchor into a log file
-whenever a phase begins or ends.
+| module   | purpose |
+|----------|---------|
+| `logger` | Structured JSONL lifecycle event logging — drop phase-boundary anchors into a log file so downstream tooling can attribute profiler samples to named phases of a rule. [Wire format spec.](docs/spec-logger.md) |
+| `prof`   | Parse and align profiler output (denet, Snakemake bench files) with logger events for per-phase resource attribution. *(in progress)* |
 
-## Coordinated logging with a profiler
+## Language implementations
 
-`omnibench-logger` is designed to be paired with a sampling profiler
-such as [denet](https://github.com/chatziko/denet). The profiler
-records CPU / memory / IO at a fixed cadence; this logger records the
-rule's named phase boundaries. At analysis time you join the two on
-timestamp:
+### Python
 
-```
-denet samples:                ~~.~..~~..~~..~~..~~..~~..
-omnibench events:       |start "align"                     |end "align"
-                        └──────────── attributed ──────────┘
-```
-
-The profiler tells you **what** the process was doing; this log tells
-you **what phase it was in** while it was doing it. Neither is
-sufficient alone.
-
-## Installation
-
-```bash
-pip install omnibench-logger
-```
-
-Or directly from source:
-
-```bash
-pip install .
-```
-
-## Usage
+`logger` and `prof` are submodules of the `obkit` package:
 
 ```python
-from omnibench_logger import init_logger, emit
-
-init_logger("/path/to/logs")
-
-emit("align", "start")
-# … do work …
-emit("align", "end")
+from obkit.logger import init_logger, emit
+from obkit.prof import ...       # coming soon
 ```
 
-`init_logger(path)` creates the directory if needed and sets the output file
-to `<path>/omnibench-events.jsonl`. `emit(event, phase)` appends a JSON-lines
-record with a UTC timestamp, PID, and hostname. An optional `attrs` dict can
-carry extra fields.
+Zero dependencies — pure stdlib.
 
-## Layout
+```bash
+pip install obkit
+```
 
-- [`SPEC.md`](SPEC.md) — language-agnostic wire format (omnibench-events 0.1).
-- [`omnibench_logger/`](omnibench_logger/) — Python package (`omnibench-logger` on PyPI).
-- [`omnibench.logger/`](omnibench.logger/) — R reference implementation.
-  (The package is named with a dot because R doesn't allow hyphens in
-  package names.)
+### R
+
+`obkit` is a single package. Modules map to function-prefix groups:
+`logger_init()` / `logger_emit()` for logger, `prof_*()` for prof.
+This is idiomatic R — there are no submodule namespaces, but the
+prefix makes the grouping explicit.
+
+```r
+library(obkit)
+logger_init("/path/to/logs")
+logger_emit("align", "start")
+```
+
+One dependency: `jsonlite`.
+
+```r
+devtools::install("r/obkit")
+```
+
+## Documentation
+
+- [Logger usage](docs/usage-logger.md)
+- [Prof usage](docs/usage-prof.md)
+- [Logger wire format spec](docs/spec-logger.md)
+
+## Repository layout
+
+```
+python/obkit/
+  logger/      # submodule: init_logger, emit
+  prof/        # submodule: (in progress)
+r/obkit/
+  R/
+    logger.R   # logger_init, logger_emit
+    prof.R     # prof_* (in progress)
+docs/
+  spec-logger.md
+  usage-logger.md
+  usage-prof.md
+```
 
 ## Status
 

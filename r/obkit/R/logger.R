@@ -1,6 +1,30 @@
+.obkit_state <- new.env(parent = emptyenv())
+.obkit_state$log_file <- NULL
+.obkit_state$warned_uninit <- FALSE
+
 .iso_ts <- function(t = Sys.time()) {
   ms <- sprintf("%03d", as.integer((as.numeric(t) %% 1) * 1000))
   paste0(format(t, "%Y-%m-%dT%H:%M:%S", tz = "UTC"), ".", ms, "Z")
+}
+
+#' Initialize the event logger.
+#'
+#' Creates `path` if it does not exist and configures subsequent
+#' `logger_emit()` calls to append to `<path>/omnibench-events.jsonl`.
+#'
+#' @param path Directory that will hold the event log.
+#' @return The resolved log file path, invisibly.
+#' @export
+logger_init <- function(path) {
+  if (!is.character(path) || length(path) != 1L || !nzchar(path)) {
+    stop("logger_init(): 'path' must be a non-empty string")
+  }
+  dir.create(path, showWarnings = FALSE, recursive = TRUE)
+  log_file <- file.path(normalizePath(path, mustWork = TRUE),
+                        "omnibench-events.jsonl")
+  .obkit_state$log_file <- log_file
+  .obkit_state$warned_uninit <- FALSE
+  invisible(log_file)
 }
 
 #' Emit a lifecycle event.
@@ -14,18 +38,18 @@
 #' @return `TRUE` if written, `FALSE` if the logger was not initialized
 #'   or the write failed. Returned invisibly.
 #' @export
-emit <- function(event, phase, attrs = NULL) {
+logger_emit <- function(event, phase, attrs = NULL) {
   if (!is.character(event) || length(event) != 1L || !nzchar(event)) {
-    stop("emit(): 'event' must be a non-empty string")
+    stop("logger_emit(): 'event' must be a non-empty string")
   }
   if (!identical(phase, "start") && !identical(phase, "end")) {
-    stop("emit(): 'phase' must be \"start\" or \"end\"")
+    stop("logger_emit(): 'phase' must be \"start\" or \"end\"")
   }
-  log_file <- .omnibench_state$log_file
+  log_file <- .obkit_state$log_file
   if (is.null(log_file)) {
-    if (!isTRUE(.omnibench_state$warned_uninit)) {
-      warning("omnibenchR: emit() called before init_logger(); events discarded.")
-      .omnibench_state$warned_uninit <- TRUE
+    if (!isTRUE(.obkit_state$warned_uninit)) {
+      warning("obkit: logger_emit() called before logger_init(); events discarded.")
+      .obkit_state$warned_uninit <- TRUE
     }
     return(invisible(FALSE))
   }
@@ -39,7 +63,7 @@ emit <- function(event, phase, attrs = NULL) {
   )
   if (!is.null(attrs)) {
     if (!is.list(attrs) || (length(attrs) > 0 && is.null(names(attrs)))) {
-      stop("emit(): 'attrs' must be a named list")
+      stop("logger_emit(): 'attrs' must be a named list")
     }
     rec$attrs <- attrs
   }
@@ -51,7 +75,7 @@ emit <- function(event, phase, attrs = NULL) {
     writeLines(line, con, sep = "\n", useBytes = TRUE)
     TRUE
   }, error = function(e) {
-    message("omnibenchR: emit() write failed: ", conditionMessage(e))
+    message("obkit: logger_emit() write failed: ", conditionMessage(e))
     FALSE
   })
   invisible(ok)
